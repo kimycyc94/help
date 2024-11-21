@@ -1,0 +1,127 @@
+Step 1: Multiple Drop Areas
+You can add support for multiple drop areas by slightly modifying the logic to identify and handle different drop zones.
+Update drop-box.component.html
+Add additional drop zones:
+[html]
+
+<div id="dropbox1" class="dropbox" (dragover)="onDragOver($event)" (drop)="onDrop($event)">
+  Drop items here (Zone 1)
+</div>
+
+<div id="dropbox2" class="dropbox" (dragover)="onDragOver($event)" (drop)="onDrop($event)">
+  Drop items here (Zone 2)
+</div>
+
+<div id="items">
+  <div
+    *ngFor="let item of draggableItems"
+    [id]="item.id"
+    class="draggable"
+    draggable="true"
+    (dragstart)="onDragStart($event, item.id)"
+  >
+    {{ item.label }}
+  </div>
+</div>
+
+
+---------------------------------------------------------------------------------------------------------
+Update drop-box.component.scss
+Style the additional drop zones:
+[css]
+
+.dropbox {
+  width: 300px;
+  height: 300px;
+  border: 2px dashed #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  margin: 10px;
+  transition: border-color 0.3s ease;
+
+  &.drag-over {
+    border-color: blue;
+  }
+
+  .draggable {
+    width: 80%;
+    height: 80%;
+    transition: all 0.3s ease;
+  }
+}
+
+#items {
+  display: flex;
+  gap: 10px;
+}
+
+---------------------------------------------------------------------------------------------------------
+Update drop-box.component.ts
+Update the drop logic to handle multiple zones:
+[typscript]
+
+onDrop(event: DragEvent): void {
+  event.preventDefault();
+
+  const dropbox = event.target as HTMLElement;
+  dropbox.classList.remove('drag-over');
+
+  // Retrieve the ID of the dragged item
+  const itemId = event.dataTransfer?.getData('text/plain');
+  const draggedItem = document.getElementById(itemId!);
+
+  if (draggedItem) {
+    // Append the dragged item to the targeted dropbox
+    dropbox.appendChild(draggedItem);
+
+    // Resize the dropped item
+    draggedItem.style.width = '80%';
+    draggedItem.style.height = '80%';
+  }
+}
+
+
+=====================================================================================================
+Step 2: Snapping Behavior
+To make items snap into a specific position or grid inside the drop zone:
+
+Modify drop-box.component.scss
+Add snapping behavior by positioning the items flexibly:
+[css]
+
+.dropbox {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 10px; /* Spacing between items */
+}
+
+
+=====================================================================================================
+Step 3: Integration
+Ensure that the new functionality integrates seamlessly into your project:
+1. Router Updates (if necessary): If this component should have its route, update your app-routing.module.ts file:
+[typscript]
+
+import { NgModule } from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
+import { DropBoxComponent } from './drop-box/drop-box.component';
+
+const routes: Routes = [
+  { path: '', component: DropBoxComponent },
+];
+
+@NgModule({
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule],
+})
+export class AppRoutingModule {}
+
+
+2. App Component Update: Include a router outlet if you use routing.
+[html]
+<router-outlet></router-outlet>
